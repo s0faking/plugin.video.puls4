@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<addon id="plugin.video.puls4" name="Puls 4" version="0.1.0" provider-name="sofaking">
+<addon id="plugin.video.puls4" name="Puls 4" version="0.2.0" provider-name="sofaking">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
-		<import addon="script.module.beautifulsoup"/>
+        <import addon="script.module.parsedom" version="0.9.1"/>
+		<import addon="script.common.plugin.cache" version="0.9.1"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="default.py">
         <provides>video</provides>
@@ -16,5 +17,7 @@
         <description lang="en">Puls 4 - This plugin provides access to the Austrian "Puls 4 Video Portal"</description>
         <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
         <email>sofaking@gettingmoney.at</email>
+        <website>http://nem0.lowfidelity.at</website>
+        <source>http://github.com/s0faking/plugin.video.puls4</source>
     </extension>
 </addon>
