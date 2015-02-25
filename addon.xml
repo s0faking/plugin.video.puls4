@@ -3,7 +3,6 @@
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
         <import addon="script.module.parsedom" version="0.9.1"/>
-		<import addon="script.common.plugin.cache" version="0.9.1"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="default.py">
         <provides>video</provides>
@@ -14,7 +13,7 @@
         <summary lang="en">Puls 4</summary>
         <language>de</language>
         <description lang="de">Puls 4 - Ermöglicht Ihnen den Zugriff auf die Puls 4 Video Platform</description>
-        <description lang="en">Puls 4 - This plugin provides access to the Austrian "Puls 4 Video Portal"</description>
+        <description lang="en">Puls 4 - This plugin provides access to the "Puls 4 Video Portal"(Austrian Television)</description>
         <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
         <email>sofaking@gettingmoney.at</email>
         <website>http://nem0.lowfidelity.at</website>

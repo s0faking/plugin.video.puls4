@@ -8,6 +8,7 @@ version = "0.2.0"
 plugin = "Puls 4 -" + version
 author = "sofaking"
 
+#init
 common.plugin = plugin
 settings = xbmcaddon.Addon(id='plugin.video.puls4') 
 pluginhandle = int(sys.argv[1])
@@ -15,18 +16,17 @@ basepath = settings.getAddonInfo('path')
 resource_path = os.path.join( basepath, "resources" )
 media_path = os.path.join( resource_path, "media" )
 translation = settings.getLocalizedString
-forceView = settings.getSetting("forceView") == "true"
 
+#view-mode
 current_skin = xbmc.getSkinDir();
-print current_skin
 if 'confluence' in current_skin:
    defaultViewMode = 'Container.SetViewMode(503)'
 else:
    defaultViewMode = 'Container.SetViewMode(518)'
-
 thumbViewMode = 'Container.SetViewMode(500)'
 smallListViewMode = 'Container.SetViewMode(51)'
 
+#urls
 base_url = "http://m.puls4.com/"
 file_base_url = "http://files.puls4.com/"
 top_url = "http://m.puls4.com/api/teaser/top"
@@ -35,22 +35,20 @@ highlight_view_url = "http://m.puls4.com/api/teaser/highlight-view"
 show_url = "http://m.puls4.com/api/channel/"
 video_url = "http://m.puls4.com/api/video/"
 
+#paths
 logopath = os.path.join(media_path,"logos")
 defaultlogo = os.path.join(logopath,"Default.png")
 defaultbackdrop = "http://goo.gl/XWnTc"
-forceView = settings.getSetting("forceView") == "true"
 
-
+#urlib init
 opener = urllib2.build_opener()
 opener.addheaders = [('User-agent', 'Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X) AppleWebKit/537.51.1 (KHTML, like Gecko) Version/7.0 Mobile/11A465 Safari/9537.53')]
-
-global_playlist = xbmc.PlayList(xbmc.PLAYLIST_VIDEO)
  
 
 def getMainMenu():
-    addDirectory("Highlights",defaultlogo,"","","getHighlights")
-    addDirectory("Sendungen",defaultlogo,"","","getSendungen")
-    addDirectory("Top Videos",defaultlogo,"","","getTopVideos")
+    addDirectory((translation(30000)).encode("utf-8"),defaultlogo,"","","getHighlights")
+    addDirectory((translation(30001)).encode("utf-8"),defaultlogo,"","","getSendungen")
+    addDirectory((translation(30002)).encode("utf-8"),defaultlogo,"","","getTopVideos")
                 
 def getJSONVideos(url):
     html = common.fetchPage({'link': url})
@@ -148,17 +146,6 @@ def getShowByID(id):
                     videourl = video["files"]["h1"]["url"]
         if videourl != "":
             createListItem(title,image,channel+"\n"+aired+"\n"+desc,duration,date,channel,videourl,"True",False,None)
-    
-    
-def searchVideos():
-    keyboard = xbmc.Keyboard('')
-    keyboard.doModal()
-    if (keyboard.isConfirmed()):
-      searchurl = "%s/video/keywordSearch?f[keyword]=%s&gsa_collection_id=videos"%(base_url,keyboard.getText())
-      getSearchedShows(searchurl)
-    else:
-      addDirectory("Keine Ergebnisse",defaultlogo,defaultbackdrop,"","")
-    listCallback(False,thumbViewMode)
 
     
 ############################
@@ -169,14 +156,13 @@ def listCallback(sort,viewMode=defaultViewMode):
     if sort:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_VIDEO_TITLE)
     xbmcplugin.endOfDirectory(pluginhandle)
-    if forceView:
-        xbmc.executebuiltin(viewMode)
+    xbmc.executebuiltin(viewMode)
 
 def createListItem(title,banner,description,duration,date,channel,videourl,playable,folder,subtitles=None,width=640,height=360): 
     if banner == '':
         banner = defaultbanner
     if description == '':
-        description = "Keine Beschreibung"
+        description = (translation(30004)).encode("utf-8")
     liz=xbmcgui.ListItem(title, iconImage=banner, thumbnailImage=banner)
     liz.setInfo( type="Video", infoLabels={ "Title": title } )
     liz.setInfo( type="Video", infoLabels={ "Tvshowtitle": title } )

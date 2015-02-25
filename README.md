@@ -5,7 +5,7 @@ Puls4 is an addon that gives you access to the Puls4 Video Platform.
 
 Requirements
 ------------
-Tested on XBMC Eden/Frodo
+Tested on Gotham and KODI
 
 
 Supported platforms
@@ -16,15 +16,9 @@ Windows, Linux , Android and OSX
 Current Features
 ----------------
 * All Shows
-* Search
-* H264 Stream
-* Top Shows and Most Popular
-
-
-Missing Features
-----------------
-* Date Search Function
-* Pager
+* H264 Stream (HD/SD)
+* Top Videos
+* Highlights
 
 
 Known Issues

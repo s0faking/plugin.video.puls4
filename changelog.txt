@@ -1,6 +1,10 @@
 0.2.0
 * Fixed the Addon
-* Fast & Light ;)
+* All Shows
+* H264 Stream (HD/SD)
+* Top Videos
+* Highlights
+* Fast & Light (JSON Datasource);)
 
 0.1.0
 * All Shows
