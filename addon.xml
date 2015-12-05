@@ -15,6 +15,7 @@
         <description lang="de">Puls 4 - Ermöglicht Ihnen den Zugriff auf die Puls 4 Video Platform</description>
         <description lang="en">Puls 4 - This plugin provides access to the "Puls 4 Video Portal"(Austrian Television)</description>
         <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+        <forum>http://forum.kodi.tv/showthread.php?tid=219656</forum>
         <email>sofaking@gettingmoney.at</email>
         <website>http://nem0.lowfidelity.at</website>
         <source>http://github.com/s0faking/plugin.video.puls4</source>
