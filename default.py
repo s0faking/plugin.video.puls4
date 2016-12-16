@@ -84,7 +84,6 @@ def getJsonContentUrls(url):
 
             
 def parseJsonDirectoryContent(url):
-    print url
     html = common.fetchPage({'link': url})
     data = json.loads(html.get("content"))   
     if data.has_key("formatOverviewItems"):
@@ -152,7 +151,6 @@ def parseJsonGridVideoContent(url):
                         addDirectory(title,fanart,fanart,subline,id,"getShowByID",isVideo)
                 
 def getJSONVideos(url):
-    print url
     html = common.fetchPage({'link': url})
     data = json.loads(html.get("content"))   
     if data.has_key("videos"):
