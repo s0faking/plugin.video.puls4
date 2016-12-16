@@ -4,7 +4,7 @@
 import urllib,urllib2,re,xbmcplugin,xbmcgui,sys,xbmcaddon,base64,socket,datetime,time,os,os.path,urlparse,json
 import CommonFunctions as common
 
-version = "0.2.2"
+version = "0.2.3"
 plugin = "Puls 4 -" + version
 author = "sofaking"
 
@@ -35,6 +35,11 @@ highlight_view_url = "http://m.puls4.com/api/teaser/highlight-view"
 show_url = "http://m.puls4.com/api/channel/"
 video_url = "http://m.puls4.com/api/video/"
 
+main_url = "http://www.puls4.com/api/json-fe/page/"
+highlight_url = "http://www.puls4.com/api/json-fe/page/sendungen"
+show_directory = "http://www.puls4.com/api/json-fe/page/Alle-Sendungen"
+detail_infos_url = "http://m.puls4.com/api/video/%s"
+
 #paths
 logopath = os.path.join(media_path,"logos")
 defaultlogo = defaultbanner = os.path.join(logopath,"DefaultV2.png")
@@ -46,24 +51,106 @@ opener.addheaders = [('User-agent', 'Mozilla/5.0 (iPad; CPU OS 7_0 like Mac OS X
  
 
 def getMainMenu():
-    addDirectory((translation(30000)).encode("utf-8"),defaultlogo,"","","getHighlights")
-    addDirectory((translation(30001)).encode("utf-8"),defaultlogo,"","","getSendungen")
-    #addDirectory((translation(30002)).encode("utf-8"),defaultlogo,"","","getTopVideos")
-    
+    addDirectory((translation(30000)).encode("utf-8"),defaultlogo,"","","","getHighlights")
+    addDirectory((translation(30001)).encode("utf-8"),defaultlogo,"","","","getSendungen")
+    getDynamicMenuItems()
 
-def getPageTopItems():
-    html = common.fetchPage({'link': top_url})
-    data = json.loads(html.get("content"))    
-    for video in data['content']:
-        section_url = base_url+video['url']
-        html_section = common.fetchPage({'link': section_url})
-        data_section = json.loads(html_section.get("content"))
-        if data_section.has_key("slides"):
-            for item in data_section['slides']:
-                print item['title'].encode('UTF-8')
+def getDynamicMenuItems():
+    json_links = getJsonContentUrls(main_url)
+    for json_link in json_links:
+        url = "%s%s" % (base_url,json_link['url'])
+        html = common.fetchPage({'link':url })
+        data = json.loads(html.get("content"))   
+        if data.has_key("headingText") and data.has_key("rows"):
+            title = data["headingText"].encode('UTF-8')
+            addDirectory(title,defaultlogo,"","",url,"getDynamicVideo")
+
+def getJsonContentUrl(url):
+    html = common.fetchPage({'link': url})
+    data = json.loads(html.get("content"))
+    if data.has_key("content"):
+        if len(data['content']) > 1:
+            return "%s%s" % (base_url,data['content'][0]['url'])
         else:
-            print data_section
-    
+            return "%s%s" % (base_url,data['content'][0]['url'])
+            
+def getJsonContentUrls(url):
+    html = common.fetchPage({'link': url})
+    data = json.loads(html.get("content"))
+    links = []
+    if data.has_key("content"):
+        if len(data['content']) > 0:
+            return data['content'];
+
+            
+def parseJsonDirectoryContent(url):
+    print url
+    html = common.fetchPage({'link': url})
+    data = json.loads(html.get("content"))   
+    if data.has_key("formatOverviewItems"):
+        for video in data['formatOverviewItems']:
+            for item in video["blocks"]:
+                name = item['channel'].encode('UTF-8')
+                if name != "":
+                    id = item['channelId']
+                    logo = "%s%s" % (base_url,video['channelLogoImg'])
+                    poster = "%s%s" % (base_url,video['formatOverviewItemImgVersions']['low'])
+                    fanart = "%s%s" % (base_url,video['formatOverviewItemImgVersions']['hi'])
+                    desc = "%s \n%s: %s \n\n(%s)" % (name,item['label'].encode('UTF-8'),item['title'].encode('UTF-8'),item['date'].encode('UTF-8'))
+                    addDirectory(name,fanart,fanart,desc,id,"getShowByID")            
+
+def parseJsonVideoContent(url):
+    html = common.fetchPage({'link': url})
+    data = json.loads(html.get("content"))   
+    if data.has_key("formatOverviewItems"):
+        for video in data['formatOverviewItems']:
+            for item in video["blocks"]:
+                name = item['channel'].encode('UTF-8')
+                if name != "":
+                    id = item['objectId']
+                    title = "%s - %s" % (name,item['title'].encode('UTF-8'))
+                    logo = "%s%s" % (base_url,video['channelLogoImg'])
+                    poster = "%s%s" % (base_url,video['formatOverviewItemImgVersions']['low'])
+                    fanart = "%s%s" % (base_url,video['formatOverviewItemImgVersions']['hi'])
+                    desc = "%s \n%s\n%s \n\n(%s)" % (name,video['announcement'].encode('UTF-8'),item['title'].encode('UTF-8'),item['date'].encode('UTF-8'))
+                    if video.has_key("isVideo"):
+                        isVideo = video_item["isVideo"]
+                    else:
+                        isVideo = False
+                    addDirectory(title,fanart,fanart,desc,id,"getShowByID",isVideo)
+                
+def parseJsonGridVideoContent(url):
+    html = common.fetchPage({'link': url})
+    data = json.loads(html.get("content"))   
+    if data.has_key("rows"):
+        for video in data['rows']:
+            for item in video["cols"]:
+                if item.has_key("content"):
+                    for video_item in item['content']:
+                        isVideo = False
+                        name = video_item['channel'].encode('UTF-8')
+                        if video_item.has_key("isVideo") and video_item["isVideo"]:
+                            isVideo = video_item["isVideo"]
+                            id = video_item['objectId']
+                        else:
+                            id = video_item['channelId']
+                        title = "%s - %s" % (name,video_item['title'].encode('UTF-8'))
+                        logo = video_item['previewLink']
+                        poster = video_item['previewLinkVersions']['low']
+                        fanart = video_item['previewLinkVersions']['hi']
+                        if video_item.has_key("description"):
+                            desc = video_item['description'].encode('UTF-8')
+                        else:
+                            desc = ""                        
+                        
+                        if video_item.has_key("date"):
+                            date = "(%s)" % video_item['date'].encode('UTF-8')
+                        else:
+                            date = ""
+                            
+                        subline = "%s\n%s\n\n%s" % (name,desc,date)
+                        addDirectory(title,fanart,fanart,subline,id,"getShowByID",isVideo)
+                
 def getJSONVideos(url):
     print url
     html = common.fetchPage({'link': url})
@@ -91,7 +178,7 @@ def getJSONVideos(url):
             channel = video["channel"]["name"].encode('UTF-8')
             title = cleanText(video["title"].encode('UTF-8'))
             videourl = ""
-            addDirectory(title,image,channel+"\n"+aired+"\n"+desc,id,"getShowByID")
+            addDirectory(title,image,"",channel+"\n"+aired+"\n"+desc,id,"getShowByID")
 
 def translateDay(day):  
     if day == "Monday":
@@ -109,22 +196,10 @@ def translateDay(day):
     elif day == "Sunday":
         return "Sonntag"
     return day
-                
-def getJSONSendungen(url):
-    html = common.fetchPage({'link': url})
-    data = json.loads(html.get("content"))   
-    for show in data:
-        try:
-            image = show["logo"]["orig"].encode('UTF-8')
-        except:
-            image = ""
-        id = show["id"]
-        title = cleanText(show["name"].encode('UTF-8'))
-        addDirectory(title,image,"",id,"getShowByID")
-        
+    
         
 def getShowByID(id):
-    url = "http://m.puls4.com/api/video/"+id
+    url = detail_infos_url % id
     html = common.fetchPage({'link': url})
     data = json.loads(html.get("content"))   
     for video in data:
@@ -199,12 +274,9 @@ def createListItem(title,banner,description,duration,date,channel,videourl,playa
             
     xbmcplugin.addDirectoryItem(handle=pluginhandle, url=videourl, listitem=liz, isFolder=folder)
     return liz
-
-def addFile(name,videourl,banner,summary,runtime,backdrop):
-    createListItem(name,banner,summary,runtime,'','',videourl,'true',False,'')
-    
-def addDirectory(title,banner,description,link,mode):
-    parameters = {"link" : link,"title" : cleanText(title),"banner" : banner,"backdrop" : defaultbackdrop, "mode" : mode}
+  
+def addDirectory(title,banner,backdrop,description,link,mode,isVideo=False):
+    parameters = {"link" : link,"title" : cleanText(title),"banner" : banner,"backdrop" : backdrop, "mode" : mode}
     u = sys.argv[0] + '?' + urllib.urlencode(parameters)
     createListItem(title,banner,description,'','','',u,'false',True)
     
@@ -221,33 +293,31 @@ def parameters_string_to_dict(parameters):
             if (len(paramSplits)) == 2:
                 paramDict[paramSplits[0]] = paramSplits[1]
     return paramDict
-       
+
        
 #Getting Parameters
 params=parameters_string_to_dict(sys.argv[2])
 mode=params.get('mode')
 title=params.get('title')
 link=params.get('link')
-logo=params.get('logo')
-category=params.get('category')
 backdrop=params.get('backdrop')
 
 
 if mode == 'getHighlights':
-    getJSONVideos(highlight_url)
-    getJSONVideos(highlight_view_url)
+    json_link = getJsonContentUrl(highlight_url)
+    parseJsonVideoContent(json_link)
     listCallback(False,defaultViewMode)
-if mode == 'getTopVideos':
-    getPageTopItems()
+if mode == 'getDynamicVideo':
+    link = urllib.unquote(link)
+    json_link = parseJsonGridVideoContent(link)
     listCallback(False,defaultViewMode)
 if mode == 'getShowByID':
     getShowByID(link)
     listCallback(False,defaultViewMode)
 if mode == 'getSendungen':
-    getJSONSendungen(show_url)
+    json_link = getJsonContentUrl(show_directory)
+    parseJsonDirectoryContent(json_link)
     listCallback(False,defaultViewMode)
-if mode == 'searchPhrase':
-    searchVideos()
 else:
     getMainMenu()
     listCallback(False,defaultViewMode)
