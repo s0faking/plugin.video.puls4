@@ -307,7 +307,7 @@ if mode == 'getHighlights':
     listCallback(False,defaultViewMode)
 if mode == 'getDynamicVideo':
     link = urllib.unquote(link)
-    json_link = parseJsonGridVideoContent(link)
+    parseJsonGridVideoContent(link)
     listCallback(False,defaultViewMode)
 if mode == 'getShowByID':
     getShowByID(link)
