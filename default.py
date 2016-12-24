@@ -17,15 +17,6 @@ resource_path = os.path.join( basepath, "resources" )
 media_path = os.path.join( resource_path, "media" )
 translation = settings.getLocalizedString
 
-#view-mode
-current_skin = xbmc.getSkinDir();
-if 'confluence' in current_skin:
-   defaultViewMode = 'Container.SetViewMode(503)'
-else:
-   defaultViewMode = 'Container.SetViewMode(518)'
-thumbViewMode = 'Container.SetViewMode(500)'
-smallListViewMode = 'Container.SetViewMode(51)'
-
 #urls
 base_url = "http://m.puls4.com"
 file_base_url = "http://files.puls4.com/"
@@ -70,8 +61,6 @@ def getJsonContentUrl(url):
     data = json.loads(html.get("content"))
     if data.has_key("content"):
         if len(data['content']) > 1:
-            return "%s%s" % (base_url,data['content'][0]['url'])
-        else:
             return "%s%s" % (base_url,data['content'][0]['url'])
             
 def getJsonContentUrls(url):
@@ -180,19 +169,19 @@ def getJSONVideos(url):
 
 def translateDay(day):  
     if day == "Monday":
-        return "Montag"
+        return (translation(30005)).encode('UTF-8')
     elif day == "Tuesday":
-        return "Dienstag"
+        return (translation(30006)).encode('UTF-8')
     elif day == "Wednesday":
-        return "Mittwoch"
+        return (translation(30007)).encode('UTF-8')
     elif day == "Thursday":
-        return "Donnerstag"
+        return (translation(30008)).encode('UTF-8')
     elif day == "Friday":
-        return "Freitag"
+        return (translation(30009)).encode('UTF-8')
     elif day == "Saturday":
-        return "Samstag"
+        return (translation(30010)).encode('UTF-8')
     elif day == "Sunday":
-        return "Sonntag"
+        return (translation(30011)).encode('UTF-8')
     return day
     
         
@@ -235,12 +224,11 @@ def getShowByID(id):
 ############################
 # s0fakings little helpers #
 ############################
-def listCallback(sort,viewMode=defaultViewMode):
+def listCallback(sort):
     xbmcplugin.setContent(pluginhandle,'episodes')
     if sort:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_VIDEO_TITLE)
     xbmcplugin.endOfDirectory(pluginhandle)
-    xbmc.executebuiltin(viewMode)
 
 def createListItem(title,banner,description,duration,date,channel,videourl,playable,folder,subtitles=None,width=1280,height=720): 
     if banner == '':
@@ -304,18 +292,19 @@ backdrop=params.get('backdrop')
 if mode == 'getHighlights':
     json_link = getJsonContentUrl(highlight_url)
     parseJsonVideoContent(json_link)
-    listCallback(False,defaultViewMode)
+    listCallback(False)
 if mode == 'getDynamicVideo':
     link = urllib.unquote(link)
     parseJsonGridVideoContent(link)
-    listCallback(False,defaultViewMode)
+    listCallback(False)
 if mode == 'getShowByID':
     getShowByID(link)
-    listCallback(False,defaultViewMode)
+    listCallback(False)
 if mode == 'getSendungen':
     json_link = getJsonContentUrl(show_directory)
-    parseJsonDirectoryContent(json_link)
-    listCallback(False,defaultViewMode)
+    if json_link:
+        parseJsonDirectoryContent(json_link)
+    listCallback(False)
 else:
     getMainMenu()
-    listCallback(False,defaultViewMode)
+    listCallback(False)
