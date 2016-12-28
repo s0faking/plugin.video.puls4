@@ -19,13 +19,6 @@ translation = settings.getLocalizedString
 
 #urls
 base_url = "http://m.puls4.com"
-file_base_url = "http://files.puls4.com/"
-top_url = "http://www.puls4.com/api/json-fe/page/"
-highlight_url = "http://m.puls4.com/api/teaser/highlight"
-highlight_view_url = "http://m.puls4.com/api/teaser/highlight-view"
-show_url = "http://m.puls4.com/api/channel/"
-video_url = "http://m.puls4.com/api/video/"
-
 main_url = "http://www.puls4.com/api/json-fe/page/"
 highlight_url = "http://www.puls4.com/api/json-fe/page/sendungen"
 show_directory = "http://www.puls4.com/api/json-fe/page/Alle-Sendungen"
@@ -105,7 +98,7 @@ def parseJsonVideoContent(url):
                         isVideo = video_item["isVideo"]
                     else:
                         isVideo = False
-                    addDirectory(title,fanart,fanart,desc,id,"getShowByID",isVideo)
+                    addDirectory(title,poster,fanart,desc,id,"getShowByID",isVideo)
                 
 def parseJsonGridVideoContent(url):
     html = common.fetchPage({'link': url})
@@ -137,35 +130,7 @@ def parseJsonGridVideoContent(url):
                             date = ""
                             
                         subline = "%s\n%s\n\n%s" % (name,desc,date)
-                        addDirectory(title,fanart,fanart,subline,id,"getShowByID",isVideo)
-                
-def getJSONVideos(url):
-    html = common.fetchPage({'link': url})
-    data = json.loads(html.get("content"))   
-    if data.has_key("videos"):
-        for video in data['videos']:
-            image = video["picture"]["orig"].encode('UTF-8')
-            id = video['id']
-            desc = cleanText(video["description"].encode('UTF-8'))
-            duration = video["duration"]
-            date = video["broadcast_date"].encode('UTF-8')
-            time = video["broadcast_time"].encode('UTF-8')
-            utime = video["broadcast_datetime"]
-            
-            day = datetime.datetime.fromtimestamp(float(utime)).strftime('%d').lstrip('0')
-            
-            hour = datetime.datetime.fromtimestamp(float(utime)).strftime('%H').lstrip('0')
-            min = datetime.datetime.fromtimestamp(float(utime)).strftime('%M')
-            weekday = datetime.datetime.fromtimestamp(float(utime)).strftime('%A')
-            weekday = translateDay(weekday)
-            
-            year = datetime.datetime.fromtimestamp(float(utime)).strftime('%Y')
-            month = datetime.datetime.fromtimestamp(float(utime)).strftime('%m')
-            aired = weekday+", "+day+"."+month+"."+year+" ("+hour+":"+min+")"
-            channel = video["channel"]["name"].encode('UTF-8')
-            title = cleanText(video["title"].encode('UTF-8'))
-            videourl = ""
-            addDirectory(title,image,"",channel+"\n"+aired+"\n"+desc,id,"getShowByID")
+                        addDirectory(title,poster,fanart,subline,id,"getShowByID",isVideo)
 
 def translateDay(day):  
     if day == "Monday":
@@ -190,25 +155,18 @@ def getShowByID(id):
     html = common.fetchPage({'link': url})
     data = json.loads(html.get("content"))   
     for video in data:
-        image = video["picture"]["orig"].encode('UTF-8')
-        desc = cleanText(video["description"].encode('UTF-8'))
+        banner = video["picture"]["orig"].encode('UTF-8')
+        outline = cleanText(video["description"].encode('UTF-8'))
         duration = video["duration"]
-        date = video["broadcast_date"].encode('UTF-8')
-        time = video["broadcast_time"].encode('UTF-8')
-        utime = video["broadcast_datetime"]
-           
-        day = datetime.datetime.fromtimestamp(float(utime)).strftime('%d').lstrip('0')
-            
-        hour = datetime.datetime.fromtimestamp(float(utime)).strftime('%H').lstrip('0')
-        min = datetime.datetime.fromtimestamp(float(utime)).strftime('%M')
-        weekday = datetime.datetime.fromtimestamp(float(utime)).strftime('%A')
-        weekday = translateDay(weekday)
-            
-        year = datetime.datetime.fromtimestamp(float(utime)).strftime('%Y')
-        month = datetime.datetime.fromtimestamp(float(utime)).strftime('%m')
-        aired = weekday+", "+day+"."+month+"."+year+" ("+hour+":"+min+")"
-        channel = video["channel"]["name"].encode('UTF-8')
+
+        broadcast_date_ts = float(video["broadcast_datetime"])
+        broadcast_date = datetime.datetime.fromtimestamp(broadcast_date_ts)
+        aired = formatAiredString(broadcast_date)
+        
         title = cleanText(video["title"].encode('UTF-8'))
+        channel = video["channel"]["name"].encode('UTF-8')
+        description = channel+"\n"+aired+"\n\n"+outline
+        
         videourl = ""
         if video["files"]["h3"]:
             if video["files"]["h3"]["url"]:
@@ -218,23 +176,33 @@ def getShowByID(id):
                 if video["files"]["h1"]["url"]:
                     videourl = video["files"]["h1"]["url"]
         if videourl != "":
-            createListItem(title,image,channel+"\n"+aired+"\n"+desc,duration,date,channel,videourl,"True",False,None)
+            createListItem(title,banner,defaultbackdrop,description,duration,broadcast_date_ts,channel,videourl,"True",False,None)
+
 
     
 ############################
 # s0fakings little helpers #
 ############################
+def formatAiredString(airedDate):
+    try:
+        return '%s, %02d.%02d.%d - %d:%02d' % (translateDay(airedDate.strftime('%A')), airedDate.day, airedDate.month, airedDate.year, airedDate.hour, airedDate.minute)
+    except:
+        return ""
+
 def listCallback(sort):
-    xbmcplugin.setContent(pluginhandle,'episodes')
+    xbmcplugin.setContent(pluginhandle,'videos')
     if sort:
         xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_VIDEO_TITLE)
     xbmcplugin.endOfDirectory(pluginhandle)
 
-def createListItem(title,banner,description,duration,date,channel,videourl,playable,folder,subtitles=None,width=1280,height=720): 
+def createListItem(title,banner,backdrop,description,duration,date,channel,videourl,playable,folder,subtitles=None,width=1280,height=720): 
     if banner == '':
-        banner = defaultbanner
+        banner = defaultbanner    
+    if backdrop == '':
+        backdrop = defaultbackdrop
     if description == '':
         description = (translation(30004)).encode("utf-8")
+        
     liz=xbmcgui.ListItem(title, iconImage=banner, thumbnailImage=banner)
     liz.setInfo( type="Video", infoLabels={ "Title": title } )
     liz.setInfo( type="Video", infoLabels={ "Tvshowtitle": title } )
@@ -243,11 +211,13 @@ def createListItem(title,banner,description,duration,date,channel,videourl,playa
     liz.setInfo( type="Video", infoLabels={ "Plotoutline": description } )
     liz.setInfo( type="Video", infoLabels={ "Aired": date } )
     liz.setInfo( type="Video", infoLabels={ "Studio": channel } )
-    liz.setProperty('fanart_image',defaultbackdrop)
+    
+    liz.setProperty('fanart_image',backdrop)
     liz.setProperty('IsPlayable', playable)
     
     if not folder:
         try:
+            liz.setInfo( type="Video", infoLabels={ "mediatype" : 'video'})
             liz.addStreamInfo('video', { 'codec': 'h264','duration':int(duration) ,"aspect": 1.78, "width": width, "height":height})
             liz.addStreamInfo('audio', {"codec": "aac", "language": "de", "channels": 2})
             if subtitles != None:
@@ -259,12 +229,15 @@ def createListItem(title,banner,description,duration,date,channel,videourl,playa
                 liz.addStreamInfo('subtitle', {"language": "de"})
             
     xbmcplugin.addDirectoryItem(handle=pluginhandle, url=videourl, listitem=liz, isFolder=folder)
-    return liz
   
 def addDirectory(title,banner,backdrop,description,link,mode,isVideo=False):
+    if banner == '':
+        banner = defaultbanner    
+    if backdrop == '':
+        backdrop = defaultbackdrop
     parameters = {"link" : link,"title" : cleanText(title),"banner" : banner,"backdrop" : backdrop, "mode" : mode}
     u = sys.argv[0] + '?' + urllib.urlencode(parameters)
-    createListItem(title,banner,description,'','','',u,'false',True)
+    createListItem(title,banner,backdrop,description,'','','',u,'false',True)
     
 def cleanText(string):
     string = string.replace('\\n', '').replace("&#160;"," ").replace("&Ouml;","Ö").replace("&ouml;","ö").replace("&szlig;","ß").replace("&Auml;","Ä").replace("&auml;","ä").replace("&Uuml;","Ü").replace("&uuml;","ü").replace("&quot;","'").replace('&amp;', '&').replace('&#039;', '´')
