@@ -4,13 +4,13 @@
 import urllib,urllib2,re,xbmcplugin,xbmcgui,sys,xbmcaddon,base64,socket,datetime,time,os,os.path,urlparse,json
 import CommonFunctions as common
 
-version = "0.2.3"
+version = "0.3.0"
 plugin = "Puls 4 -" + version
 author = "sofaking"
 
 #init
 common.plugin = plugin
-settings = xbmcaddon.Addon(id='plugin.video.puls4') 
+settings = xbmcaddon.Addon()
 pluginhandle = int(sys.argv[1])
 basepath = settings.getAddonInfo('path')
 resource_path = os.path.join( basepath, "resources" )
