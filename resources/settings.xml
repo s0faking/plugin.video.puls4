@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <category label="32000">
+        <setting id="useApiCache" type="bool" label="30012" default="true" />
+        <setting id="cacheExp" type="number" label="30013" default="60" />
+        <setting id="debugLog" type="bool" label="30014" default="false" />
+    </category>
+</settings>

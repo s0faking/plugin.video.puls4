@@ -60,3 +60,19 @@ msgstr ""
 msgctxt "#30011"
 msgid "Sunday"
 msgstr ""
+
+msgctxt "#30012"
+msgid "Cache API requests"
+msgstr ""
+
+msgctxt "#30013"
+msgid "Cache expires after xy minutes"
+msgstr ""
+
+msgctxt "#30014"
+msgid "Enable extended logging"
+msgstr ""
+
+msgctxt "#32000"
+msgid "Default"
+msgstr ""
