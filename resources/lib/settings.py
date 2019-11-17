@@ -13,5 +13,10 @@ def useApiCache():
 def cacheExp():
     return int(__addon__.getSetting('cacheExp'))
 
+
+def useWidevine():
+    return True  # int(__addon__.getSetting('cacheExp'))
+
+
 def debugLog():
     return __addon__.getSetting('debugLog') == 'true'

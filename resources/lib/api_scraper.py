@@ -2,19 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-
-import CommonFunctions
-import simplecache
 import simplejson as json
 
 from . import settings
-from .app_common import *
-from .base import *
-from .utils import *
+from .app_common import log, get_data, translate, defaultlogo
+from .base import addElement
+from .utils import formatAiredString, dateFromTimeStamp
 
-# init
-CommonFunctions.plugin = plugin_name
-_cache = simplecache.SimpleCache()
 _str_nl = '\n'
 
 # urls
@@ -40,22 +34,8 @@ def buildLink(url):
         return url
 
 
-def getData(url, forceFetch=False):
-    if not url:
-        return url
-    url = buildLink(url)
-    start = datetime.datetime.now()
-    val = _cache.get(url)
-    if val and settings.useApiCache() and not forceFetch:
-        data = val
-    else:
-        html = CommonFunctions.fetchPage({'link': url})
-        data = json.loads(html.get('content'))
-        _cache.set(url, data, expiration=datetime.timedelta(
-            minutes=settings.cacheExp()))
-    end = datetime.datetime.now()
-    log('getData (' + str(int((end - start).total_seconds() * 1000)) + 'ms) ' + str(url))
-    return data
+def getData(url):
+    return get_data(buildLink(url))
 
 
 def getMainMenu():
@@ -64,6 +44,8 @@ def getMainMenu():
                getJsonContentUrl(_highlight_url), 'getFormatSlider')
     addElement(translate(30001), defaultlogo, '', translate(30001),
                getJsonContentUrl(_show_dir_url), 'getFormatSliderForce')
+    addElement('Livestream', defaultlogo, '', 'stream',
+               '', 'playlive', isFolder=False)
     getDynamicMenuItems(_main_url)
 
 

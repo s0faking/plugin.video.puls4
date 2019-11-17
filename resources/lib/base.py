@@ -5,11 +5,31 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
+import inputstreamhelper
 
-from .app_common import *
-from .utils import *
+from .app_common import log, defaultbanner, addon_handle, addon_url, translate
+from .utils import cleanText, encodeUrl
 
 _itemsToAdd = []
+
+
+def get_InputStreamHelper(drm):
+    streamHelper = None
+    try:
+        streamHelper = inputstreamhelper.Helper('mpd', drm=drm)
+    except Exception as ex:
+        if ex == 'UnsupportedDRMScheme' and drm == 'com.microsoft.playready':
+            streamHelper = inputstreamhelper.Helper('mpd', drm=None)
+            pass
+        else:
+            log('translate(32018)')
+
+    if streamHelper and not streamHelper._has_inputstream():
+        # install inputstream
+        xbmc.executebuiltin(
+            'InstallAddon(' + streamHelper.inputstream_addon + ')', True)
+
+    return streamHelper
 
 
 def addElement(title, fanart, icon, description, link, mode, channel='', duration=None, date='', isFolder=True,
@@ -67,5 +87,17 @@ def addItemsToKodi(sort):
 
 def play_video(url):
     play_item = xbmcgui.ListItem(path=url)
+    xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)
+    log('callback done')
+
+
+def play_liveStream(path, addon, drm, tkn):
+    play_item = xbmcgui.ListItem(path=path)
+    play_item.setProperty('inputstreamaddon', addon)
+    play_item.setProperty('inputstream.adaptive.manifest_type', 'mpd')
+    play_item.setProperty('inputstream.adaptive.license_type', drm)
+    play_item.setProperty(
+        'inputstream.adaptive.manifest_update_parameter', 'full')
+    play_item.setProperty('inputstream.adaptive.license_key', tkn)
     xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)
     log('callback done')
