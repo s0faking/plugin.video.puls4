@@ -5,7 +5,7 @@ import datetime
 import simplejson as json
 
 from . import settings
-from .app_common import log, get_data, translate, defaultlogo
+from .app_common import log, get_data, translate, defaultlogo, kodiVersion
 from .base import addElement
 from .utils import formatAiredString, dateFromTimeStamp
 
@@ -44,8 +44,9 @@ def getMainMenu():
                getJsonContentUrl(_highlight_url), 'getFormatSlider')
     addElement(translate(30001), defaultlogo, '', translate(30001),
                getJsonContentUrl(_show_dir_url), 'getFormatSliderForce')
-    addElement('Livestream', defaultlogo, '', 'stream',
-               '', 'playlive', isFolder=False)
+    if kodiVersion >= 17:
+        addElement('Livestream', defaultlogo, '', 'Puls4 LiveStream',
+                   '', 'playlive', isFolder=False, width=1024 , height=576)
     getDynamicMenuItems(_main_url)
 
 

@@ -5,9 +5,9 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
-import inputstreamhelper
 
-from .app_common import log, defaultbanner, addon_handle, addon_url, translate
+from .app_common import log, defaultbanner, addon_handle, addon_url, translate, showNotification, kodiVersion, installAddon
+
 from .utils import cleanText, encodeUrl
 
 _itemsToAdd = []
@@ -15,6 +15,14 @@ _itemsToAdd = []
 
 def get_InputStreamHelper(drm):
     streamHelper = None
+
+    if kodiVersion >= 17:
+        try:
+            import inputstreamhelper
+        except:
+            installAddon('script.module.inputstreamhelper')
+            return streamHelper
+
     try:
         streamHelper = inputstreamhelper.Helper('mpd', drm=drm)
     except Exception as ex:
@@ -22,7 +30,7 @@ def get_InputStreamHelper(drm):
             streamHelper = inputstreamhelper.Helper('mpd', drm=None)
             pass
         else:
-            log('translate(32018)')
+            showNotification(translate(30018).format(drm), notificationType='ERROR')
 
     if streamHelper and not streamHelper._has_inputstream():
         # install inputstream

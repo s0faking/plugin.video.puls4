@@ -163,7 +163,7 @@ def decryptToStringbb(data, key):
 
 # String decryptToStringbs(byte[] data, String key)
 def decryptToStringbs(data, key):
-    bytes = decryptbs(data, key);
+    bytes = decryptbs(data, key)
     if (bytes == None):
         return None
     return str(bytes, "UTF-8")

@@ -15,7 +15,7 @@ def cacheExp():
 
 
 def useWidevine():
-    return True  # int(__addon__.getSetting('cacheExp'))
+    return __addon__.getSetting("drmToUse") == "0"
 
 
 def debugLog():

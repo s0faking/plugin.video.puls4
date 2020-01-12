@@ -27,8 +27,8 @@ def play_livestream(livestream_id):
     log(config, 'debug')
 
     mdslive = config.get('mdsclient').get('mdsLive')
-    client_tkn = '01' + hashlib.sha1('puls4-24x7' + mdslive.get('salt') + mdslive.get(
-        'accessToken') + mdslive.get('clientLocation')).hexdigest()
+    client_tkn = '01' + hashlib.sha1(('puls4-24x7' + mdslive.get('salt') + mdslive.get(
+        'accessToken') + mdslive.get('clientLocation')).encode('utf-8')).hexdigest()
     protocols_url = mdslive.get('baseUrl') + 'live/1.0/getprotocols?' + \
         'access_token=' + mdslive.get('accessToken') + \
         '&client_location=' + mdslive.get('clientLocation') + \
@@ -38,9 +38,9 @@ def play_livestream(livestream_id):
     protocols = get_data(protocols_url, forceFetch=True)
     log(protocols, 'debug')
 
-    client_server_tkn = '01' + hashlib.sha1('puls4-24x7' + mdslive.get('salt') + mdslive.get(
-        'accessToken') + protocols.get('server_token') + mdslive.get('clientLocation') + protocol).hexdigest()
-    urls_url = mdslive.get('baseUrl') + 'live/1.0/geturls?' + \
+    client_server_tkn = '01' + hashlib.sha1(('puls4-24x7' + mdslive.get('salt') + mdslive.get(
+        'accessToken') + protocols.get('server_token') + mdslive.get('clientLocation') + protocol).encode('utf-8')).hexdigest()
+    geturls_url = mdslive.get('baseUrl') + 'live/1.0/geturls?' + \
         'access_token=' + mdslive.get('accessToken') + \
         '&client_location=' + mdslive['clientLocation'] + \
         '&client_token=' + client_server_tkn + \
@@ -49,13 +49,13 @@ def play_livestream(livestream_id):
         '&secure_delivery=true' + \
         '&server_token=' + protocols.get('server_token')
 
-    urls = get_data(urls_url, forceFetch=True)
+    urls = get_data(geturls_url, forceFetch=True)
     log(urls, 'debug')
 
     streamHelper = get_InputStreamHelper(drm)
 
     if streamHelper and streamHelper.check_inputstream():
-        userAgent = '|User-Agent=vvs-native-android/1.0.10 (Linux;Android 7.1.1) ExoPlayerLib/2.8.1'
+        userAgent = '|User-Agent=Mozilla/5.0 (Linux; Android 8.0.0;) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.116 Mobile Safari/537.36'
         dash_drm = urls.get('urls').get('dash').get(drm_name)
         path = dash_drm.get('url') + userAgent
         tkn = dash_drm.get('drm').get('licenseAcquisitionUrl') + '?token=' + \

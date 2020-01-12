@@ -73,6 +73,26 @@ msgctxt "#30014"
 msgid "Enable extended logging"
 msgstr "Erweitertes Logging einschalten"
 
+msgctxt "#30015"
+msgid "DRM System to use"
+msgstr "DRM System"
+
+msgctxt "#30016"
+msgid "WIDEVINE (default)"
+msgstr "WIDEVINE (standard)"
+
+msgctxt "#30017"
+msgid "PLAYREADY (Android only)"
+msgstr "PLAYREADY (nur Android)"
+
+msgctxt "#30018"
+msgid "DRM '{0}' is not supported"
+msgstr "DRM '{0}' wird nicht unterstützt"
+
+msgctxt "#30019"
+msgid "The addon '{0}' is missing, do you want to install?"
+msgstr "Die Erweiterung: '{0}' ist nicht installiert, installieren?"
+
 msgctxt "#32000"
 msgid "Default"
 msgstr "Standard"
