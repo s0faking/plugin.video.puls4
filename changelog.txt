@@ -1,4 +1,5 @@
 0.4.0
+* Added Livestream
 * Kodi19 support
 * Add categorys like 'ganze videos' to Shows
 * Since the API is slow, added possibility to cache API calls to improve loading time
