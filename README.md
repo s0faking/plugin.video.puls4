@@ -3,11 +3,6 @@ Puls4 XBMC Addon
 Puls4 is an addon that gives you access to the Puls4 Video Platform.
 
 
-Requirements
-------------
-Tested on Jarvis
-
-
 Supported platforms
 -------------------
 Windows, Linux , Android and OSX
@@ -21,6 +16,7 @@ Current Features
 * Missed a Show?
 * New Videos
 * Popular Videos
+* Livestream
 
 
 Known Issues
