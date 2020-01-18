@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon id="plugin.video.puls4" name="Puls 4" version="0.4.0" provider-name="sofaking">
     <requires>
-        <import addon="xbmc.python" version="2.26.0"/>
+        <import addon="xbmc.python" version="2.24.0"/>
         <import addon="script.module.future" version="0.17.1" optional="false"/>
         <import addon="script.module.parsedom" version="2.5.2" optional="false"/>
-        <import addon="script.module.simplecache" version="1.0.17" optional="false"/>
+        <import addon="script.module.simplecache" version="1.0.11" optional="false"/>
         <import addon="script.module.simplejson" version="3.16.1" optional="false"/>
+        <import addon="script.module.inputstreamhelper" version="0.3.5" optional="true"/>
     </requires>
     <extension point="xbmc.python.pluginsource" library="default.py">
         <provides>video</provides>

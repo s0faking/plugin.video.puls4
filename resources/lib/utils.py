@@ -1,17 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
-# don't move this 
+# don't move this
 from future.standard_library import install_aliases
 install_aliases()
 
-import datetime
-import re
-import time
+from .app_common import translate
 import urllib.parse
-
-from .app_common import *
-
+import time
+import sys
+import re
+import datetime
 
 if sys.version_info >= (3, 0, 0):
     string_types = str,
@@ -92,3 +90,14 @@ def formatAiredString(airedDate):
                 *(time.strptime(airedDate, _timeStampFormat)[0:6]))
 
     return '%s, %02d.%02d.%d - %d:%02d' % (translateDay(airedDate.strftime('%A')), airedDate.day, airedDate.month, airedDate.year, airedDate.hour, airedDate.minute)
+
+
+def parameters_string_to_dict(parameters):
+    paramDict = {}
+    if parameters:
+        paramPairs = parameters[1:].split('&')
+        for paramsPair in paramPairs:
+            paramSplits = paramsPair.split('=')
+            if (len(paramSplits)) == 2:
+                paramDict[paramSplits[0]] = paramSplits[1]
+    return paramDict

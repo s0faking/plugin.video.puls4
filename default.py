@@ -2,15 +2,20 @@
 # -*- coding: utf-8 -*-
 
 import datetime
+import sys
 
 import simplejson as json
 import xbmc
 import xbmcaddon
 import xbmcgui
 import xbmcplugin
+
 from resources.lib import api_scraper as scraper
-from resources.lib.base import *
-from resources.lib.utils import *
+from resources.lib import livePlayer as livePlayer
+
+from resources.lib.app_common import log
+from resources.lib.base import addItemsToKodi, play_video
+from resources.lib.utils import parameters_string_to_dict, unquoteUrl
 
 
 def router(paramstring):
@@ -31,8 +36,8 @@ def router(paramstring):
             addItemsToKodi(False)
         elif mode == 'getShowByUrl':
             scraper.getJsonShowByUrl(link)
-            #if the previous call provides videos AND folders 
-            #try to fetch also videos
+            # if the previous call provides videos AND folders
+            # try to fetch also videos
             if showID:
                 scraper.getJsonShowById(showID)
             addItemsToKodi(False)
@@ -47,6 +52,8 @@ def router(paramstring):
             if str(link).isdigit():
                 link = scraper.getJsonVideoLink(link)
             play_video(link)
+        elif mode == 'playlive':
+            livePlayer.play_livestream("")
         else:
             raise ValueError('Invalid paramstring: {0}!'.format(paramstring))
     else:
