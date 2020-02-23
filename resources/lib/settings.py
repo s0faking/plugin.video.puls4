@@ -3,20 +3,14 @@
 
 import xbmcaddon
 
-__addon__ = xbmcaddon.Addon()
-
-
 def useApiCache():
-    return __addon__.getSetting('useApiCache') == 'true'
-
+    return xbmcaddon.Addon().getSetting('useApiCache') == 'true'
 
 def cacheExp():
-    return int(__addon__.getSetting('cacheExp'))
-
+    return int(xbmcaddon.Addon().getSetting('cacheExp'))
 
 def useWidevine():
-    return __addon__.getSetting("drmToUse") == "0"
-
+    return xbmcaddon.Addon().getSetting("drmToUse") == "0"
 
 def debugLog():
-    return __addon__.getSetting('debugLog') == 'true'
+    return xbmcaddon.Addon().getSetting('debugLog') == 'true'

@@ -7,10 +7,7 @@ import xbmcgui
 import xbmcplugin
 
 from .app_common import log, defaultbanner, addon_handle, addon_url, translate, showNotification, kodiVersion, installAddon
-
 from .utils import cleanText, encodeUrl
-
-_itemsToAdd = []
 
 
 def get_InputStreamHelper(drm):
@@ -78,17 +75,15 @@ def addElement(title, fanart, icon, description, link, mode, channel='', duratio
     parameters = {'link': link, 'mode': mode, 'showID': showID}
     url = addon_url + '?' + encodeUrl(parameters)
 
-    global _itemsToAdd
-    _itemsToAdd.append((url, list_item, isFolder))
+    xbmcplugin.addDirectoryItem(addon_handle, url, list_item, isFolder)
+    del list_item
 
 
 def addItemsToKodi(sort):
     xbmcplugin.setPluginCategory(addon_handle, 'Show')
     xbmcplugin.setContent(addon_handle, 'videos')
-    xbmcplugin.addDirectoryItems(addon_handle, _itemsToAdd, len(_itemsToAdd))
     if sort:
-        xbmcplugin.addSortMethod(
-            addon_handle, xbmcplugin.SORT_METHOD_VIDEO_TITLE)
+        xbmcplugin.addSortMethod(addon_handle, xbmcplugin.SORT_METHOD_VIDEO_TITLE)
     xbmcplugin.endOfDirectory(addon_handle)
     log('callback done')
 
@@ -96,7 +91,9 @@ def addItemsToKodi(sort):
 def play_video(url):
     play_item = xbmcgui.ListItem(path=url)
     xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)
+    del play_item
     log('callback done')
+
 
 
 def play_liveStream(path, addon, drm, tkn):
@@ -108,4 +105,5 @@ def play_liveStream(path, addon, drm, tkn):
         'inputstream.adaptive.manifest_update_parameter', 'full')
     play_item.setProperty('inputstream.adaptive.license_key', tkn)
     xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)
+    del play_item
     log('callback done')
