@@ -18,6 +18,8 @@ _highlight_url = 'http://www.puls4.com/api/json-fe/page/sendungen'
 _show_dir_url = 'http://www.puls4.com/api/json-fe/page/Alle-Sendungen'
 _detail_url = 'http://m.puls4.com/api/video/'
 
+_useCache = settings.useApiCache()
+
 
 def buildLink(url):
     if not url:
@@ -35,7 +37,7 @@ def buildLink(url):
 
 
 def getData(url):
-    return get_data(buildLink(url))
+    return get_data(buildLink(url), useCache=_useCache)
 
 
 def getMainMenu():

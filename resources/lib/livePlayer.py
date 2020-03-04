@@ -4,9 +4,9 @@
 import simplejson as json
 import hashlib
 
-from .app_common import get_data, settings, log
+from . import settings
+from .app_common import get_data, log
 from .base import play_liveStream, get_InputStreamHelper
-
 
 _config_url = 'https://config.native-player.p7s1.io/dcb397f1ce8c1badb4a87762c344ce96.json'
 
@@ -23,7 +23,7 @@ def play_livestream(livestream_id):
         drm = 'com.microsoft.playready'
     log('selected drm: ' + drm)
 
-    config = get_data(_config_url, forceFetch=True, noMatch=True)
+    config = get_data(_config_url, forceFetch=True, decrypt=True)
     log(config, 'debug')
 
     mdslive = config.get('mdsclient').get('mdsLive')

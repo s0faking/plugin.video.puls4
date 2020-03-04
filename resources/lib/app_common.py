@@ -29,27 +29,27 @@ from . import settings
 from .xxtea import decryptBase64StringToStringss
 
 
-version = xbmcaddon.Addon().getAddonInfo('version')
-name = xbmcaddon.Addon().getAddonInfo('name')
+addon_url = sys.argv[0]
+addon_handle = int(sys.argv[1])
+addon_id = 'plugin.video.puls4'
+selfAddon = xbmcaddon.Addon(addon_id)
+version = selfAddon.getAddonInfo('version')
+name = selfAddon.getAddonInfo('name')
 plugin_name = name + ' - ' + version
 kodiVersion = xbmc.getInfoLabel('System.BuildVersion')
 kodiVersion = int(kodiVersion[:kodiVersion.index('.')])
 
-addon_url = sys.argv[0]
-addon_handle = int(sys.argv[1])
-addon_id = xbmcaddon.Addon().getAddonInfo('id')
-selfAddon = xbmcaddon.Addon(id=addon_id)
-datapath = xbmc.translatePath(selfAddon.getAddonInfo('profile'))
-addonfolder = xbmc.translatePath(selfAddon.getAddonInfo('path'))
-artfolder = os.path.join(addonfolder, 'resources', 'img')
-watchedfolder = os.path.join(datapath, 'watched')
-media_path = os.path.join(addonfolder, 'resources', 'media')
 # paths
+addonfolder = xbmc.translatePath(selfAddon.getAddonInfo('path'))
+del selfAddon
+media_path = os.path.join(addonfolder, 'resources', 'media')
 logopath = os.path.join(media_path, 'logos')
 defaultlogo = defaultbanner = os.path.join(logopath, 'DefaultV2.png')
 defaultbackdrop = ''
 
 common_cache = simplecache.SimpleCache()
+_cacheMinutes = settings.cacheExp()
+_debugLog = settings.debugLog()
 _xxtea_key = '3543373833383336354337383634363635433738363633383236354337383330363435393543373833393335323435433738363533393543373833383332334635433738363633333344334235433738333836363335'
 
 
@@ -66,16 +66,15 @@ def showNotification(message, notificationType='INFO', duration=5000):
     xbmcgui.Dialog().notification(name, message.encode('utf-8'), icon, duration)
 
 
-def get_data(url, forceFetch=False, noMatch=False):
+def get_data(url, forceFetch=False, decrypt=False, useCache=True):
     if not url:
         return url
 
     start = datetime.datetime.now()
     tag = ''
     data = ''
-
-    forceFetch = forceFetch and not settings.useApiCache()
-
+    forceFetch = forceFetch or not useCache
+    
     cache = common_cache.get(url)
     if cache:
         try:
@@ -83,12 +82,13 @@ def get_data(url, forceFetch=False, noMatch=False):
             data = cache.get('data')
         except:
             data = cache
-
-        if data and forceFetch:
+        
+        if data and not forceFetch:
+            log('getData Cache (' + str(int((datetime.datetime.now() - start).total_seconds() * 1000)) + 'ms) ' + str(url), 'Debug')
             return json.loads(data)
 
     new_headers = {}
-    if noMatch == True:
+    if tag != '':
         new_headers.update({'If-None-Match': tag})
     new_headers.update({'User-Agent': 'okhttp/3.10.0'})
     new_headers.update({'Accept-Encoding': 'gzip'})
@@ -96,13 +96,14 @@ def get_data(url, forceFetch=False, noMatch=False):
     try:
         request = urllib_urlopen(urllib_Request(url, headers=new_headers))
     except urllib_HTTPError as e:
-        log(e.code)
-        if noMatch and e.code == 304:
+        if e.code == 304:
+            log('getData 304 (' + str(int((datetime.datetime.now() - start).total_seconds() * 1000)) + 'ms) ' + str(url), 'Debug')
             return json.loads(data)
         failure = str(e)
         if hasattr(e, 'code') or hasattr(e, 'reason'):
             log('get_data ERROR: ' + url + ' / ' + failure)
 
+        log('getData RequestErr (' + str(int((datetime.datetime.now() - start).total_seconds() * 1000)) + 'ms) ' + str(url), 'Debug')
         return json.loads(data)
 
     if request.info().get('Content-Encoding') == 'gzip':
@@ -112,25 +113,28 @@ def get_data(url, forceFetch=False, noMatch=False):
     else:
         data = request.read()
 
-    if noMatch:
-        data = decryptBase64StringToStringss(data, _xxtea_key)
-        common_cache.set(url, {'data': data, 'tag': request.info().get(
-            'ETag')}, expiration=datetime.timedelta(days=200))
-    else:
-        common_cache.set(url, {'data': data, 'tag': ''}, expiration=datetime.timedelta(
-            minutes=settings.cacheExp()))
+    #if Etag is set, use it
+    exp = datetime.timedelta(minutes=_cacheMinutes)
+    if request.info().get('ETag'):
+        tag = request.info().get('ETag')
+        exp = datetime.timedelta(days=200)
 
-    end = datetime.datetime.now()
-    log('getData (' + str(int((end - start).total_seconds() * 1000)) + 'ms) ' + str(url))
+    if decrypt:
+        data = decryptBase64StringToStringss(data, _xxtea_key)
+    
+    common_cache.set(url, {'data': data, 'tag': tag}, expiration=exp)
+
+    log('getData (' + str(int((datetime.datetime.now() - start).total_seconds() * 1000)) + 'ms) ' + str(url), 'Debug')
     return json.loads(data)
 
 
 def translate(text):
-    return selfAddon.getLocalizedString(text)
+    return xbmcaddon.Addon(addon_id).getLocalizedString(text)
 
 
 def log(message, logType='Info'):
-    if logType.lower() == 'debug' and settings.debugLog() == False:
+    if logType.lower() == 'debug' and _debugLog == False:
         return
     xbmc.log(msg='['+str(plugin_name)+'] ('+logType+') ' +
              str(message), level=xbmc.LOGDEBUG)
+
