@@ -1,3 +1,6 @@
+0.5.0
+* Kodi 19 ABI Change (lower versions need to use 0.x.x)
+
 0.4.0
 * Added Livestream
 * Kodi19 support
