@@ -132,8 +132,8 @@ def translate(text):
     return xbmcaddon.Addon(addon_id).getLocalizedString(text)
 
 
-def log(message, logType='Info'):
-    if logType.lower() == 'debug' and _debugLog == False:
+def log(message, logType='Debug'):
+    if logType.lower() == 'debug' and not _debugLog:
         return
     xbmc.log(msg='['+str(plugin_name)+'] ('+logType+') ' +
              str(message), level=xbmc.LOGDEBUG)
